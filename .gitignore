@@ -1,3 +1,6 @@
 instance/
 
 **/__pycache__/
+__pycache__/
+*.py[cod]
+flaskr/__pycache__/__init__.cpython-36.pyc
