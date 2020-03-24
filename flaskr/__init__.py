@@ -2,6 +2,8 @@ import os
 
 from flask import Flask
 
+from flask_jwt import JWT, jwt_required, current_identity
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -23,10 +25,6 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # a simple page that says hello
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
 
     from . import db
     db.init_app(app)
@@ -34,4 +32,17 @@ def create_app(test_config=None):
     from . import auth
     app.register_blueprint(auth.bp)
 
+    from flaskr.auth import authenticate, identity
+    jwt = JWT(app, authenticate, identity)
+
+    # a simple page that says hello
+    @app.route('/hello')
+    def hello():
+        return 'Hello, World!'
+
+    @app.route('/protected')
+    @jwt_required()
+    def protected():
+        return '%s' % current_identity
+    
     return app
