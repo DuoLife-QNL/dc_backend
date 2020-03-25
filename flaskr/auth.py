@@ -20,8 +20,6 @@ class User(object):
 
 @bp.route('/register', methods=['POST'])
 def register():
-    # username = request.form['username']
-    # password = request.form['password']
     data = request.get_json()
     username = data['username']
     password = data['password']
