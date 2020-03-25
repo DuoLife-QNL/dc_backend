@@ -2,7 +2,6 @@ from flask import (
     Blueprint, jsonify, request, Flask
 )
 
-
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from flaskr.db import get_db

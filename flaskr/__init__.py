@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt import JWT, jwt_required, current_identity
+from flaskr.upload import STORAGE_FOLDER
 
 def create_app(test_config=None):
     # create and configure the app
@@ -11,6 +12,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+        UPLOAD_FOLDER = STORAGE_FOLDER
     )
 
     if test_config is None:
@@ -35,6 +37,10 @@ def create_app(test_config=None):
 
     from flaskr.auth import authenticate, identity
     jwt = JWT(app, authenticate, identity)
+
+    from . import upload
+    app.register_blueprint(upload.bp)
+
 
     # a simple page that says hello
     @app.route('/hello')
