@@ -6,3 +6,5 @@ __pycache__/
 flaskr/__pycache__/__init__.cpython-36.pyc
 
 storage/
+
+*.pth
