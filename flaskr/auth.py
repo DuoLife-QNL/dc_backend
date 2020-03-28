@@ -6,6 +6,13 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from flaskr.db import get_db
 
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
+
+import datetime
+
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 class User(object):
@@ -46,20 +53,24 @@ def register():
 
     return jsonify(return_dict)
 
-def authenticate(username, password):
-    db = get_db()
-    user_db = db.execute(
-        'SELECT * FROM user WHERE username = ?', (username,)
-    ).fetchone()
-    user = User(user_db['id'], user_db['username'], user_db['password'])
-    if check_password_hash(user.password, password):
-        return user
 
-def identity(payload):
-    user_id = payload['identity']
-    db = get_db()
-    user_db = db.execute(
-        'SELECT * FROM user WHERE id = ?', (user_id,)
-    ).fetchone()
-    user = User(user_db['id'], user_db['username'], user_db['password'])
-    return user
+@bp.route('/login', methods=['POST'])
+def login():
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+
+    def authenticate(username, password):
+        db = get_db()
+        user = db.execute(
+            'SELECT * FROM user WHERE username = ?', (username,)
+        ).fetchone()
+        if check_password_hash(user['password'], password):
+            return user
+
+    user = authenticate(username, password)
+    if user is not None:
+        expires = datetime.timedelta(days=1)
+        access_token = create_access_token(identity=user['username'], expires_delta=expires)
+        return jsonify(result='Succeeded', access_token=access_token)
+
+    return jsonify(result='Failed', message='Bad username or password'), 401

@@ -1,13 +1,19 @@
 import os
 
-from flask import Flask
+from flask import (
+    Flask, jsonify
+)
 from flask_cors import CORS
-from flask_jwt import JWT, jwt_required, current_identity
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
 from flaskr.paper import STORAGE_FOLDER
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+    jwt = JWTManager(app)
     CORS(app)
     app.config.from_mapping(
         SECRET_KEY='dev',
@@ -35,9 +41,6 @@ def create_app(test_config=None):
     from . import auth
     app.register_blueprint(auth.bp)
 
-    from flaskr.auth import authenticate, identity
-    jwt = JWT(app, authenticate, identity)
-
     from . import paper
     app.register_blueprint(paper.bp)
 
@@ -47,9 +50,10 @@ def create_app(test_config=None):
     def hello():
         return 'Hello, World!'
 
-    @app.route('/protected')
-    @jwt_required()
+    @app.route('/protected', methods=['GET'])
+    @jwt_required
     def protected():
-        return '%s' % current_identity
+        current_user = get_jwt_identity()
+        return jsonify(identity=current_user)
     
     return app

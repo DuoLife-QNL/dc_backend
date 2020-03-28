@@ -2,7 +2,10 @@ from flask import (
     Blueprint, request, current_app, jsonify
 )
 
-from flask_jwt import current_identity, jwt_required
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,
+    get_jwt_identity
+)
 
 import base64, os
 
@@ -16,7 +19,7 @@ bp = Blueprint('paper', __name__, url_prefix='/paper')
 STORAGE_FOLDER = './storage'
 
 @bp.route('/upload/img', methods=['POST'])
-@jwt_required()
+@jwt_required
 def upload_img():
     # 获取传输的base64格式数据
     # 使用axios传送json数据，使用get_json方法
@@ -30,8 +33,9 @@ def upload_img():
     img_jpg = base64.b64decode(img_base64)
     
     # 将图片一并保存
-    if current_identity is not None:
-        filename = str(current_identity).split('\'')[1] + '-temp.jpg'
+    current_user = get_jwt_identity()
+    if current_user is not None:
+        filename = str(current_user) + '-temp.jpg'
     else:
         filename = 'temp.jpg'
     dir_name = current_app.config['UPLOAD_FOLDER']
