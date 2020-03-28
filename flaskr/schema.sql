@@ -14,9 +14,7 @@ CREATE TABLE user (
 CREATE TABLE exam(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT UNIQUE NOT NULL,
-  month INTEGER,
-  year INTEGER,
-  day INTEGER
+  description TEXT
 );
 
 CREATE TABLE user_exam(
@@ -53,6 +51,7 @@ CREATE TABLE answer(
 CREATE TABLE std_answer(
   exam_id INTEGER, 
   problem_no INTEGER,
+  problem_score INTEGER,
   content TEXT,
   PRIMARY KEY(
     exam_id,
