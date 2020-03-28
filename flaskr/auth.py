@@ -42,7 +42,7 @@ def register():
         ''', (username,)
     ).fetchone() is not None:
         return_dict['result'] = 'Failed'
-        return_dict['message'] = 'User {} is already registered.'.format(username)
+        return_dict['message'] = 'User {} has already been registered.'.format(username)
 
     if return_dict['result'] == 'Succeeded':
         db.execute(
