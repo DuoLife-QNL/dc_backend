@@ -56,21 +56,21 @@ def register():
 
 @bp.route('/login', methods=['POST'])
 def login():
-    username = request.json.get('username', None)
-    password = request.json.get('password', None)
+    username = request.json.get('username')
+    password = request.json.get('password')
+    return_dict = {}
+    return_dict['result'] = 'Succeeded'
 
-    def authenticate(username, password):
-        db = get_db()
-        user = db.execute(
-            'SELECT * FROM user WHERE username = ?', (username,)
-        ).fetchone()
-        if check_password_hash(user['password'], password):
-            return user
+    db = get_db()
+    user = db.execute(
+        'SELECT * FROM user WHERE username = ?', (username,)
+    ).fetchone()
 
-    user = authenticate(username, password)
-    if user is not None:
-        expires = datetime.timedelta(days=1)
-        access_token = create_access_token(identity=user['username'], expires_delta=expires)
-        return jsonify(result='Succeeded', access_token=access_token)
+    if (user is None) or (not check_password_hash(user['password'], password)):
+        return_dict['result'] = 'Failed'
+        return_dict['message'] = 'Bad username or password'
+        return jsonify(return_dict), 401
 
-    return jsonify(result='Failed', message='Bad username or password'), 401
+    expires = datetime.timedelta(days=1)
+    access_token = create_access_token(identity=user['id'], expires_delta=expires)
+    return jsonify(result='Succeeded', access_token=access_token)
