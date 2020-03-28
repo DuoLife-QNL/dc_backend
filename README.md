@@ -7,10 +7,10 @@
 flask init-db
 ```
 
-## 接口说明
+# 接口说明
 接口接收与返回数据均为`json`格式
 
-### /auth/register
+## /auth/register
 
 #### mothod = post
 #### content
@@ -35,7 +35,7 @@ Otherwise, return:
 }
 ```
 
-### /auth/login
+## /auth/login
 
 #### mothod = post
 #### content
@@ -61,7 +61,7 @@ Otherwise, return:
 }
 ```
 
-### /upload/img
+## /upload/img
 JWT required
 #### method = post
 #### content
@@ -79,5 +79,5 @@ JWT required
     * class: which letter it is
     * box: the location of the letter
     * score: accurate score of recognition
-    
+
 返回值为由`valid`和`letters`组成的json
