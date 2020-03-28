@@ -44,6 +44,8 @@ def create_app(test_config=None):
     from . import paper
     app.register_blueprint(paper.bp)
 
+    from . import exam
+    app.register_blueprint(exam.bp)
 
     # a simple page that says hello
     @app.route('/hello')
