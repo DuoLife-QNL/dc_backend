@@ -61,5 +61,4 @@ def create():
 
     db.commit()
 
-    return jsonify(result='Succeeded')
-
+    return jsonify(result='Succeeded', examID=exam['id'] + 100000)
