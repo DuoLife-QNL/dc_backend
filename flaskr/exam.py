@@ -44,21 +44,24 @@ def create():
     ;
     """
 
-    # 创建考试，加入考试表
-    db.execute(sql_create_exam, (name, description))
-    exam = db.execute(sql_get_exam, (name,)).fetchone()
+    if db.execute(sql_get_exam, (name,)).fetchone() is None:
+        # 创建考试，加入考试表
+        db.execute(sql_create_exam, (name, description))
+        exam = db.execute(sql_get_exam, (name,)).fetchone()
 
-    # 插入用户-考试表，使当前用户与这场考试相关联
-    # 此时current_user为已登录用户的id，数据类型为integer
-    current_user = get_jwt_identity()
-    db.execute(sql_user_exam, (current_user, exam['id']))
+        # 插入用户-考试表，使当前用户与这场考试相关联
+        # 此时current_user为已登录用户的id，数据类型为integer
+        current_user = get_jwt_identity()
+        db.execute(sql_user_exam, (current_user, exam['id']))
 
-    for (i, data) in enumerate(std_answer, 1):
-        content = str(data)[0]
-        problem_score = int(str(data)[1])
+        for (i, data) in enumerate(std_answer, 1):
+            content = str(data)[0]
+            problem_score = int(str(data)[1])
 
-        db.execute(sql_std_answer, (exam['id'], i, problem_score, content))
+            db.execute(sql_std_answer, (exam['id'], i, problem_score, content))
 
-    db.commit()
+        db.commit()
 
-    return jsonify(result='Succeeded', examID=exam['id'] + 100000)
+        return jsonify(result='Succeeded', examID=exam['id'] + 100000)
+    else:
+        return jsonify(result='Failed', message='An exam of the same name already exists.')
