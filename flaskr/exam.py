@@ -113,7 +113,7 @@ def modify():
     if name is not None:
         db.execute(sql_modify_name, (name, id))
     if description is not None:
-        db.execute(sql_modify_description, (name, id))
+        db.execute(sql_modify_description, (description, id))
     if std_answer is not None:
         for problem in std_answer:
             if db.execute(sql_get_std_answer, (problem['problem_no'], )).fetchone() is not None:
@@ -124,7 +124,7 @@ def modify():
 
     return jsonify(result='Succeeded')        
 
-@bp.route('/get-exam-info', methods=['GET'])
+@bp.route('/get-exam-info', methods=['POST'])
 @jwt_required
 def get_exam_info():
     id = request.json.get('id') - 100000
@@ -160,7 +160,6 @@ def get_exam_info():
 
     db = get_db()
     current_user = get_jwt_identity()
-    print('here***********************')
     if db.execute(sql_get_user_exam, (current_user, id)).fetchone() is None:
         db.execute(sql_insert_user_exam, (current_user, id))
         db.commit()
