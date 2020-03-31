@@ -83,8 +83,10 @@ JWT required
 返回值为由`valid`和`letters`组成的json
 
 ## /exam
+/exam 下所有的接口均为jwt required
 ### /exam/create
 
+* 作用：用户创建考试
 * method = post
 * content
     * name: 考试名称
@@ -97,3 +99,93 @@ JWT required
   * The creation would fail if the exam already exists, in this case, backend should return:
     * result: "Failed"
     * message: "An exam of the same name already exists."
+
+### /exam/modify
+* 作用：用户修改考试信息
+* method = post
+* content
+  * id: exam id, 必须传输此项
+  * name: 修改之后的考试名称，若不传输，则不修改考试名称，下同
+  * description
+  * std_answer：一个list，list中的每一项是一个dict，用于指明修改哪道题，包含三个字段：
+    * problem_no：题号
+    * problem_score：分值
+    * content：修改后的答案
+* example
+```json
+{
+	"id" : 100005,
+	"name" : "Modified name",
+	"description" : "modify test",
+	"std_answer" : [
+		{
+			"problem_no" : 2,
+			"problem_score" : 3,
+			"content" : "C"
+		},
+		{
+			"problem_no" : 4,
+			"problem_score" : 1,
+			"content" : "D"
+		}
+	]
+}
+```
+* return value
+  * result = "Succeeded"
+
+### exam/get-exam-info
+* 作用：通过考试id获取考试信息
+* content
+  * id: exam id
+* return value
+  * id
+  * name
+  * description
+  * std_answer: 一个list，按照题号顺序排列（此处不考虑选择题题号不连续的情况），其中每一项由答案和分值组成，如`A2`表示此题答案为A，占2分
+* return example
+```json
+{
+  "description": "Modified name",
+  "id": 100005,
+  "name": "Modified name",
+  "std_answer": [
+    "A2",
+    "B3",
+    "C3",
+    "D1"
+  ]
+}
+```
+其中，`B3`表示第二题答案为B，占三分。
+
+### exam/get-user-exam
+* method = get
+* content: no need to send http body
+* return value:
+  * exam_info: 一个list，其中每一项为一个dict，并包含三个字段：
+    * id
+    * name
+    * description
+* return example:
+```json
+{
+  "exam_info": [
+    {
+      "description": "测试接口, test api",
+      "id": 100003,
+      "name": "测试test3"
+    },
+    {
+      "description": "测试接口, test api",
+      "id": 100004,
+      "name": "测试test4"
+    },
+    {
+      "description": "Modified name",
+      "id": 100005,
+      "name": "Modified name"
+    }
+  ]
+}
+```
