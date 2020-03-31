@@ -9,7 +9,7 @@ flask init-db
 
 # 接口说明
 * 接口接收与返回数据均为`json`格式
-* **用户身份认证采用JWT方式**
+* **用户身份认证采用JWT方式**，对于所有标注了`jwt required`的接口，当发生Token错误时：
   * 若Token未注册，返回：`"msg": "Signature verification failed"`
   * 若Token已过期，返回：`"msg": "Token has expired"`
 
