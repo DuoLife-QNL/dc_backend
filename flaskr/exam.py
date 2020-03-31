@@ -126,7 +126,7 @@ def modify():
 
 @bp.route('/get-exam-info', methods=['GET'])
 @jwt_required
-def get():
+def get_exam_info():
     id = request.json.get('id') - 100000
 
     sql_get_exam = """
@@ -176,3 +176,33 @@ def get():
     
     return_dict = {'id': id + 100000, 'name': exam['name'], 'description': exam['description'], 'std_answer': std_answer}
     return jsonify(return_dict)
+
+@bp.route('/get-user-exam', methods=['GET'])
+@jwt_required
+def get_user_exam():
+    db = get_db()
+    current_user = get_jwt_identity()
+
+    sql_get_info = """
+    --sql
+    SELECT *
+    FROM exam
+    where id IN (
+        SELECT exam_id
+        FROM user_exam
+        WHERE user_id=?
+    )
+    ;
+    """
+
+    exam_info = db.execute(sql_get_info, (current_user,)).fetchall()
+    
+    if not len(exam_info):
+        return jsonify(result='NULL', message='Current user has no exams.')
+    else:
+        info_dict_list = []
+        for exam in exam_info:
+            exam = dict(exam)
+            exam['id'] = exam['id'] + 100000
+            info_dict_list.append(exam)
+        return jsonify(exam_info=info_dict_list)
