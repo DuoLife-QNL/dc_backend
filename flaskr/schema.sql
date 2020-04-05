@@ -24,8 +24,8 @@ CREATE TABLE user_exam(
     user_id,
     exam_id
   )
-  FOREIGN KEY (user_id) REFERENCES user(id),
-  FOREIGN KEY (exam_id) REFERENCES exam(id)
+  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+  FOREIGN KEY (exam_id) REFERENCES exam(id) ON DELETE CASCADE
 );
 
 CREATE TABLE paper(
@@ -33,8 +33,8 @@ CREATE TABLE paper(
   exam_id INTEGER,
   book INTEGER,
   page INTEGER,
-  path TEXT NOT NULL,
-  FOREIGN KEY (exam_id) REFERENCES exam(id)
+  img_path TEXT,
+  FOREIGN KEY (exam_id) REFERENCES exam(id) ON DELETE CASCADE
 );
 
 CREATE TABLE answer(
@@ -45,7 +45,7 @@ CREATE TABLE answer(
     paper_id,
     problem_no
   ),
-  FOREIGN KEY (paper_id) REFERENCES paper(id)
+  FOREIGN KEY (paper_id) REFERENCES paper(id) ON DELETE CASCADE
 );
 
 CREATE TABLE std_answer(
@@ -57,5 +57,5 @@ CREATE TABLE std_answer(
     exam_id,
     problem_no
   ),
-  FOREIGN key (exam_id) REFERENCES exam(id)
+  FOREIGN key (exam_id) REFERENCES exam(id) ON DELETE CASCADE
 );
