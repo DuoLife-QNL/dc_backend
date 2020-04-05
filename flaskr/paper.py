@@ -11,6 +11,8 @@ import base64, os
 
 from backend_model.net import Model
 
+from flaskr.db import get_db
+
 model = Model()
 
 bp = Blueprint('paper', __name__, url_prefix='/paper')
@@ -63,3 +65,73 @@ def upload_img():
     else:
         dict['valid'] = False   
     return jsonify(dict)
+
+@bp.route('/upload/answer', methods=['POST'])
+@jwt_required
+def upload_answer():
+    exam_id = request.json.get('examID') - 100000
+    book = request.json.get('book')
+    page = request.json.get('page')
+    answer = request.json.get('answer')
+
+    db = get_db()
+
+    sql_exam_exist = """
+    --sql
+    SELECT * 
+    FROM exam
+    WHERE id=?
+    ;
+    """
+    sql_get_paper = """
+    --sql
+    SELECT * 
+    FROM paper
+    WHERE exam_id=? AND book=? AND page=?
+    ;
+    """
+    sql_create_paper = """
+    --sql
+    INSERT INTO paper(exam_id, book, page)
+    VALUES(?, ?, ?) 
+    ;
+    """
+    sql_problem_exist = """
+    --sql
+    SELECT * 
+    FROM answer
+    WHERE paper_id=? AND problem_no=?
+    ;
+    """
+    sql_insert_problem = """
+    --sql
+    INSERT INTO answer
+    VALUES(?, ?, ?) 
+    ;
+    """
+    sql_update_problem = """
+    --sql
+    UPDATE answer
+    SET content=?
+    WHERE paper_id=? AND problem_no=?
+    ;
+    """
+
+
+    if db.execute(sql_exam_exist, (exam_id,)).fetchone() is None:
+        return jsonify(result = 'Failed', message = 'The exam ID does not exist.')
+    
+    if db.execute(sql_get_paper, (exam_id, book, page)).fetchone() is None:
+        db.execute(sql_create_paper, (exam_id, book, page))
+    
+    paper = db.execute(sql_get_paper, (exam_id, book, page)).fetchone()
+
+    for (i, content) in enumerate(answer, 1):
+        if db.execute(sql_problem_exist, (paper['id'], i)).fetchone() is not None:
+            db.execute(sql_update_problem, (content, paper['id'], i))
+        else:
+            db.execute(sql_insert_problem, (paper['id'], i, content))
+
+    db.commit()
+
+    return jsonify(result = 'Succeeded.')
