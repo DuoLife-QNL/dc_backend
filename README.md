@@ -66,8 +66,9 @@ Otherwise, return:
 }
 ```
 
-## /upload/img
-JWT required
+## /paper
+**JWT required**
+### /paper/upload/image
 #### method = post
 #### content
 ```json
@@ -86,6 +87,15 @@ JWT required
     * score: accurate score of recognition
 
 返回值为由`valid`和`letters`组成的json
+
+### /paper/upload/answer
+* 作用：上传用户在前端手动确认或修改后的最终识别答案
+* method: post
+* content
+  *  examID
+  *  book：第几本
+  *  page：第几张
+  *  answer：一个list，每一项为一道题的答案，若考生未作答，传"X"
 
 ## /exam
 /exam 下所有的接口均为jwt required
@@ -141,6 +151,7 @@ JWT required
 
 ### exam/get-exam-info
 * 作用：通过考试id获取考试信息
+* method = post
 * content
   * id: exam id
 * return value
@@ -194,3 +205,9 @@ JWT required
   ]
 }
 ```
+
+### exam/delete
+* 作用：删除考试，**注意，这会导致级联删除考试的所有信息**
+* method = post
+* content
+  * examID
