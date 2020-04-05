@@ -205,3 +205,29 @@ def get_user_exam():
             exam['id'] = exam['id'] + 100000
             info_dict_list.append(exam)
         return jsonify(exam_info=info_dict_list)
+
+@bp.route('/delete', methods=['POST'])
+@jwt_required
+def delete():
+    id = request.json.get('examID') - 100000
+
+    sql_delete = """
+    --sql
+    DELETE FROM exam
+    WHERE id=?
+    ;
+    """
+    sql_get_exam = """
+    --sql
+    SELECT * 
+    FROM exam
+    WHERE id=?
+    ;
+    """
+
+    db = get_db()
+    if db.execute(sql_get_exam, (id,)).fetchone() is None:
+        return jsonify(result='Failed.', message='The exam does not exit.')
+    db.execute(sql_delete, (id,))
+    db.commit()
+    return jsonify(result='Succeeded.')
