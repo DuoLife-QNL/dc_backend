@@ -97,6 +97,12 @@ def upload_answer():
     VALUES(?, ?, ?) 
     ;
     """
+    sql_delete_paper_problem = """
+    --sql
+    DELETE FROM answer
+    WHERE paper_id=? 
+    ;
+    """
     sql_problem_exist = """
     --sql
     SELECT * 
@@ -127,11 +133,10 @@ def upload_answer():
     
     paper = db.execute(sql_get_paper, (exam_id, book, page)).fetchone()
 
+
+    db.execute(sql_delete_paper_problem, (paper['id'],))
     for (i, content) in enumerate(answer, 1):
-        if db.execute(sql_problem_exist, (paper['id'], i)).fetchone() is not None:
-            db.execute(sql_update_problem, (content, paper['id'], i))
-        else:
-            db.execute(sql_insert_problem, (paper['id'], i, content))
+        db.execute(sql_insert_problem, (paper['id'], i, content))
 
     db.commit()
 
