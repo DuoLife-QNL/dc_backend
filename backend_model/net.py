@@ -15,7 +15,7 @@ class Letter:
         self.boxesn = boxesn
         self.classn = classn
         self.scoren = scoren
-
+        
 class Model:
     # 构建并加载模型参数
     CLASS_NAMES = ['__background__', 'A', 'B', 'C', 'D', 'X']
@@ -28,7 +28,6 @@ class Model:
     model_path = os.path.join(os.path.dirname(backend_model.__file__), 'model-use.pth')
     model.load_state_dict(torch.load(model_path))
     model.eval()
-    clf = KMeans(n_clusters=8)  # 8簇kemns聚类模型
 
     # 预测
     def prediction(self, img, threshold):
@@ -54,7 +53,7 @@ class Model:
         return pred_boxes, pred_class, pred_score
 
     # 将预测目标进行排序，返回排序后的结果
-    def getAns(self, img, threshold):
+    def getAns(self, img, threshold, letterNum):
 
         pred_boxes, pred_class, pred_score =  self.prediction(img, threshold)
         letters = []
@@ -65,8 +64,10 @@ class Model:
                 
         letters.sort(key=lambda x: x.boxesn[0] + 2000 * x.boxesn[1]) # 按照纵坐标粗排
         letters_y = np.array([(x.boxesn[1] + x.boxesn[3]) / 2 for x in letters]).reshape(-1, 1)
-        self.clf.fit(letters_y) # 将所有目标的纵坐标使用聚类，细分出每行的目标，然后行内按照横坐标排序
-        row_labels = self.clf.predict(letters_y)
+
+        clf = KMeans(n_clusters=(letterNum // 5))  # kemns聚类模型
+        clf.fit(letters_y) # 将所有目标的纵坐标使用聚类，细分出每行的目标，然后行内按照横坐标排序
+        row_labels = clf.predict(letters_y)
         last_row_label = -1
         begin = 0
         sorted_letters = [] # 存储排序后的目标字母

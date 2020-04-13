@@ -29,6 +29,7 @@ def upload_img():
     img_base64 = data['imageData']
     bookNo = data['bookNo']
     paperNo = data['paperNo']
+    letterNum = data['letterNum']
 
     # 去除base64传送来的头，只保留有效内容
     img_base64 = img_base64.split(',')[1]
@@ -49,7 +50,7 @@ def upload_img():
     file.write(img_jpg)
     file.close()
 
-    letters = model.getAns(filename, 0.5)
+    letters = model.getAns(filename, 0.5, letterNum)
     dict = {}
     dict['letters'] = []
     for (index, item) in  enumerate(letters):
