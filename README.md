@@ -90,6 +90,7 @@ Otherwise, return:
 
 ### /paper/upload/answer
 * 作用：上传用户在前端手动确认或修改后的最终识别答案
+* 注意：每次上传答案，若该试卷已存在，试卷答案会被全部替换，而不管答案数目如何
 * method: post
 * content
   *  examID
@@ -211,3 +212,70 @@ Otherwise, return:
 * method = post
 * content
   * examID
+
+### exam/get-book-answer
+* 以本为单位获取考生答题情况
+* method = post
+* content
+  * examID
+  * book
+* return example:
+```json
+{
+  "1": [
+    "D",
+    "A",
+    "B",
+    "D"
+  ],
+  "2": [
+    "C",
+    "B",
+    "A",
+    "D"
+  ],
+  "3": [
+    "D",
+    "C",
+    "B",
+    "D"
+  ],
+  "4": [
+    "D",
+    "C",
+    "B",
+    "A"
+  ]
+}
+```
+其中，1、2、3、4代表第几章卷子，每张卷子的四道题答案在随后的list中按顺序列出
+
+### exam/get-total-answer
+* 获取一场考试考生的整体答题情况
+* 返回信息：每道题选择A、B、C、D的人数
+* method = post
+* content
+  * examID
+* return example
+```json
+{
+  "1": {
+    "C": 2,
+    "D": 4
+  },
+  "2": {
+    "A": 1,
+    "B": 1,
+    "C": 4
+  },
+  "3": {
+    "A": 1,
+    "B": 5
+  },
+  "4": {
+    "A": 1,
+    "D": 5
+  }
+}
+```
+其中，最外侧的数字代表题号，每个题号之后的dict中表示本题选项的选择人数。若无某个选项，表示选择人数为0。特别地，O代表未作答，X代表其它非常规选项。
