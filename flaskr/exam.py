@@ -226,8 +226,83 @@ def delete():
     """
 
     db = get_db()
+    db.execute("PRAGMA foreign_keys = ON;")
     if db.execute(sql_get_exam, (id,)).fetchone() is None:
         return jsonify(result='Failed.', message='The exam does not exit.')
     db.execute(sql_delete, (id,))
     db.commit()
     return jsonify(result='Succeeded.')
+
+@bp.route('/get-book-answer', methods=['POST'])
+@jwt_required
+def get_book_answer():
+    exam_id = request.json.get('examID') - 100000
+    book = request.json.get('book')
+
+    sql_get_paper_id = """
+    --sql
+    SELECT *
+    FROM paper
+    WHERE exam_id=? AND book=?
+    ORDER BY page ASC
+    ;
+    """
+    sql_get_paper_answer = """
+    --sql
+    SELECT *
+    FROM answer
+    WHERE paper_id=?
+    ORDER BY problem_no ASC
+    ;
+    """
+    db = get_db()
+
+    papers = db.execute(sql_get_paper_id, (exam_id, book)).fetchall()
+
+    return_dict = {}
+    for paper in papers:
+        paper_id = paper['id']
+        answers = db.execute(sql_get_paper_answer, (paper_id,)).fetchall()
+        paper_list = []
+        for answer in answers:
+            paper_list.append(answer['content'])
+        return_dict[paper['page']] = paper_list
+
+    return(jsonify(return_dict))
+
+@bp.route('/get-total-answer', methods=['POST'])
+@jwt_required
+def get_total_answer():
+    exam_id = request.json.get('examID') - 100000
+
+    sql_get_problem_sum = """
+    --sql
+    SELECT content, count(*) AS total_num
+    FROM answer
+    WHERE problem_no=? AND paper_id IN (
+        SELECT id
+        FROM paper
+        WHERE exam_id=?
+    )
+    GROUP BY content
+    ;
+    """
+    sql_get_total_problem_num = """
+    --sql
+    SELECT MAX(problem_no) AS problem_count
+    FROM std_answer
+    WHERE exam_id=?
+    ;
+    """
+
+    db = get_db()
+    return_dict = {}
+    total_problem_no = db.execute(sql_get_total_problem_num, (exam_id,)).fetchone()['problem_count']
+    for problem_no in range(1, total_problem_no + 1):
+        problem_result = db.execute(sql_get_problem_sum, (problem_no, exam_id)).fetchall()
+        problem_statistic_dict = {}
+        for row in problem_result:
+            problem_statistic_dict[row['content']] = row['total_num']
+        return_dict[problem_no] = problem_statistic_dict    
+
+    return(jsonify(return_dict))
