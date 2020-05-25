@@ -28,6 +28,12 @@ class Model:
     model_path = os.path.join(os.path.dirname(backend_model.__file__), 'model-use.pth')
     model.load_state_dict(torch.load(model_path))
     model.eval()
+    
+
+    def __init__(self):
+        self.clfs = []
+        for i in range(10):
+            self.clfs.append(KMeans(n_clusters=(i + 1)))
 
     # 预测
     def prediction(self, img, threshold):
@@ -63,11 +69,12 @@ class Model:
                 letters.append(letter)
                 
         letters.sort(key=lambda x: x.boxesn[0] + 2000 * x.boxesn[1]) # 按照纵坐标粗排
-        letters_y = np.array([(x.boxesn[1] + x.boxesn[3]) / 2 for x in letters]).reshape(-1, 1)
-
-        clf = KMeans(n_clusters=(letterNum // 5))  # kemns聚类模型
-        clf.fit(letters_y) # 将所有目标的纵坐标使用聚类，细分出每行的目标，然后行内按照横坐标排序
-        row_labels = clf.predict(letters_y)
+        letters_y = np.array([(x.boxesn[1] + x.boxesn[3]) / 2 for x in letters]).reshape(-1, 1)	
+        k = letterNum // 5 # kemns聚类模型
+        if letterNum % 5 == 0:
+            k = k - 1
+        self.clfs[k].fit(letters_y) # 将所有目标的纵坐标使用聚类，细分出每行的目标，然后行内按照横坐标排序
+        row_labels = self.clfs[k].predict(letters_y)
         last_row_label = -1
         begin = 0
         sorted_letters = [] # 存储排序后的目标字母
@@ -82,4 +89,4 @@ class Model:
         return sorted_letters
         
 
-        
+  

@@ -297,7 +297,9 @@ def get_total_answer():
 
     db = get_db()
     return_dict = {}
+    # 这场考试一共有多少道题
     total_problem_no = db.execute(sql_get_total_problem_num, (exam_id,)).fetchone()['problem_count']
+    
     for problem_no in range(1, total_problem_no + 1):
         problem_result = db.execute(sql_get_problem_sum, (problem_no, exam_id)).fetchall()
         problem_statistic_dict = {}
